@@ -63,7 +63,7 @@ public final class XposedBridge {
 	// built-in handlers
 	public static final Map<Member, CopyOnWriteSortedSet<XC_MethodHook>> sHookedMethodCallbacks = new HashMap<>();
 	public static final CopyOnWriteSortedSet<XC_LoadPackage> sLoadedPackageCallbacks = new CopyOnWriteSortedSet<>();
-	/*package*/ static final CopyOnWriteSortedSet<XC_InitPackageResources> sInitPackageResourcesCallbacks = new CopyOnWriteSortedSet<>();
+	public static final CopyOnWriteSortedSet<XC_InitPackageResources> sInitPackageResourcesCallbacks = new CopyOnWriteSortedSet<>();
 
 	private XposedBridge() {}
 
@@ -263,7 +263,15 @@ public final class XposedBridge {
 	 * @hide
 	 */
 	public static void hookInitPackageResources(XC_InitPackageResources callback) {
-		// TODO not supported yet
+		synchronized (sInitPackageResourcesCallbacks) {
+			sInitPackageResourcesCallbacks.add(callback);
+		}
+	}
+
+	public static void clearInitPackageResources() {
+		synchronized (sInitPackageResourcesCallbacks) {
+			sInitPackageResourcesCallbacks.clear();
+		}
 	}
 
 	/**
@@ -364,6 +372,10 @@ public final class XposedBridge {
 
 		public Object[] getSnapshot() {
 			return elements;
+		}
+
+		public synchronized void clear() {
+			elements = EMPTY_ARRAY;
 		}
 	}
 

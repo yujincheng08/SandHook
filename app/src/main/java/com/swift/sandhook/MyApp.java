@@ -2,6 +2,7 @@ package com.swift.sandhook;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.res.XResources;
 import android.os.Build;
 import android.util.Log;
 
@@ -17,9 +18,12 @@ import com.swift.sandhook.testHookers.ObjectHooker;
 import com.swift.sandhook.wrapper.HookErrorException;
 import com.swift.sandhook.xposedcompat.XposedCompat;
 
+import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
+import de.robv.android.xposed.callbacks.XC_InitPackageResources;
+import de.robv.android.xposed.callbacks.XC_LayoutInflated;
 
 public class MyApp extends Application {
 
@@ -63,7 +67,20 @@ public class MyApp extends Application {
         //for load xp module(sandvxp)
         XposedCompat.context = this;
         XposedCompat.classLoader = getClassLoader();
-        XposedCompat.isFirstApplication= true;
+        XposedCompat.isFirstApplication = true;
+
+        XposedCompat.addXposedModuleResourceCallback(new IXposedHookInitPackageResources() {
+            @Override
+            public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resparam) throws Throwable {
+                resparam.res.setReplacement(R.string.app_name, "SandHookWithResourcesHook");
+            }
+        });
+
+        try {
+            XposedCompat.hookResources();
+        } catch (Throwable e) {
+            Log.e("sandhook", e.toString());
+        }
 
         XposedHelpers.findAndHookMethod(Activity.class, "onResume", new XC_MethodHook() {
             @Override

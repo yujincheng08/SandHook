@@ -1,5 +1,7 @@
 package de.robv.android.xposed;
 
+import android.content.res.ResourcesImpl;
+import android.content.res.XResources;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -51,7 +53,7 @@ public final class XposedInit {
      * Load a module from an APK by calling the init(String) method for all classes defined
      * in <code>assets/xposed_init</code>.
      */
-    public static void loadModule(String modulePath, String moduleOdexDir, String moduleSoPath,ClassLoader topClassLoader) {
+    public static void loadModule(String modulePath, String moduleOdexDir, String moduleSoPath, ClassLoader topClassLoader) {
 
         if (!new File(modulePath).exists()) {
             Log.e(TAG, "  File does not exist");
@@ -124,7 +126,6 @@ public final class XposedInit {
                     final Object moduleInstance = moduleClass.newInstance();
 
                     if (true) {
-
                         //fake
                         if (moduleInstance instanceof IXposedHookZygoteInit) {
                             IXposedHookZygoteInit.StartupParam param = new IXposedHookZygoteInit.StartupParam();
@@ -136,11 +137,8 @@ public final class XposedInit {
                         if (moduleInstance instanceof IXposedHookLoadPackage)
                             XposedBridge.hookLoadPackage(new IXposedHookLoadPackage.Wrapper((IXposedHookLoadPackage) moduleInstance));
 
-                        //not support now
-                        //so off
-                        if (moduleInstance instanceof IXposedHookInitPackageResources) {
-                            throw new UnsupportedOperationException("can not hook resource!");
-                        }
+                        if (moduleInstance instanceof IXposedHookInitPackageResources)
+                            XposedBridge.hookInitPackageResources(new IXposedHookInitPackageResources.Wrapper((IXposedHookInitPackageResources) moduleInstance));
                     } else {
                         //not support now
                         //so off

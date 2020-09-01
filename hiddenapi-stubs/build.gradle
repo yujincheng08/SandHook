@@ -1,0 +1,13 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+}
+
+task jarStubApis(type: Jar, dependsOn: build) {
+    baseName 'hiddenapis-stub'
+    from("$projectDir/build/intermediates/javac/release/classes/")
+    destinationDir file("$rootDir/xposedcompat/lib/")
+    exclude 'BuildConfig.class', 'R.class'
+    exclude { it.name.startsWith('R$') }
+}

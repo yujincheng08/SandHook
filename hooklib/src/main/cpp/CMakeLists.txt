@@ -14,6 +14,7 @@ set(${PROJECT_NAME}_SOURCES
         utils/utils.cpp
         utils/offset.cpp
         utils/elf_util.cpp
+        utils/resources_hook.cpp
         casts/cast_art_method.cpp
         casts/cast_compiler_options.cpp
         art/art_method.cpp

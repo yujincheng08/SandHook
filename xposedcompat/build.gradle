@@ -24,10 +24,19 @@ android {
 
 }
 
+def hiddenApiStubs = "$projectDir/lib/hiddenapis-stub.jar"
+
+afterEvaluate {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs.add("-Xbootclasspath/p:$hiddenApiStubs")
+    }
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.jakewharton.android.repackaged:dalvik-dx:9.0.0_r3'
     compileOnly project(':hooklib')
+    compileOnly files('lib/hiddenapis-stub.jar')
 }
 
 apply plugin: 'com.novoda.bintray-release'
