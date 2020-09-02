@@ -2,9 +2,12 @@ package com.swift.sandhook;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.res.XModuleResources;
 import android.content.res.XResources;
 import android.os.Build;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.swift.sandhook.test.PendingHookTest;
 import com.swift.sandhook.test.TestClass;
@@ -73,6 +76,20 @@ public class MyApp extends Application {
             @Override
             public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resparam) throws Throwable {
                 resparam.res.setReplacement(R.string.app_name, "SandHookWithResourcesHook");
+                resparam.res.hookLayout(R.layout.activity_main, new XC_LayoutInflated() {
+                    @Override
+                    public void handleLayoutInflated(LayoutInflatedParam liparam) throws Throwable {
+                        FloatingActionButton button = liparam.view.findViewById(R.id.fab);
+                        button.setImageResource(android.R.drawable.ic_dialog_dialer);
+                    }
+                });
+                resparam.res.hookLayout(R.layout.content_main, new XC_LayoutInflated() {
+                    @Override
+                    public void handleLayoutInflated(LayoutInflatedParam liparam) throws Throwable {
+                        TextView text = liparam.view.findViewById(R.id.sample_text);
+                        text.setText("Hello World! by Resources Hook");
+                    }
+                });
             }
         });
 
