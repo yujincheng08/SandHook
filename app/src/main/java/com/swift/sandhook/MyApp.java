@@ -72,6 +72,12 @@ public class MyApp extends Application {
         XposedCompat.classLoader = getClassLoader();
         XposedCompat.isFirstApplication = true;
 
+        try {
+            XposedCompat.hookResources();
+        } catch (Throwable e) {
+            Log.e("sandhook", e.toString());
+        }
+
         XposedCompat.addXposedModuleResourceCallback(new IXposedHookInitPackageResources() {
             @Override
             public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resparam) throws Throwable {
@@ -92,12 +98,6 @@ public class MyApp extends Application {
                 });
             }
         });
-
-        try {
-            XposedCompat.hookResources();
-        } catch (Throwable e) {
-            Log.e("sandhook", e.toString());
-        }
 
         XposedHelpers.findAndHookMethod(Activity.class, "onResume", new XC_MethodHook() {
             @Override

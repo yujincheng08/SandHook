@@ -68,7 +68,7 @@ public class XposedCompat {
     }
 
     public static XResources[] hookResources() throws Exception {
-        if(!initXResourcesNative(XResources.class)) return new XResources[0];
+        if (!initXResourcesNative(XResources.class)) return new XResources[0];
 
         findAndHookMethod("android.app.ApplicationPackageManager", null, "getResourcesForApplication",
                 ApplicationInfo.class, new XC_MethodHook() {
@@ -204,17 +204,20 @@ public class XposedCompat {
                 });
 
         Application application = ApplicationUtils.currentApplication();
-        Object contextImpl = XposedHelpers.getObjectField(application, "mBase");
-        LoadedApk loadedApk = (LoadedApk)XposedHelpers.getObjectField(contextImpl, "mPackageInfo");
-        String resDir = (String)XposedHelpers.getObjectField(loadedApk, "mResDir");
-        Resources res = (Resources)XposedHelpers.getObjectField(contextImpl, "mResources");
-        ResourcesImpl resImpl = (ResourcesImpl)XposedHelpers.getObjectField(res, "mResourcesImpl");
-        ClassLoader classLoader = (ClassLoader) XposedHelpers.getObjectField(contextImpl, "mClassLoader");
-        XResources newRes = new XResources(classLoader);
-        newRes.setImpl(resImpl);
-        newRes.initObject(resDir);
-        XposedHelpers.setObjectField(contextImpl, "mResources", newRes);
-        XposedHelpers.setObjectField(loadedApk, "mResources", newRes);
+        XResources newRes = null;
+        if (application != null) {
+            Object contextImpl = XposedHelpers.getObjectField(application, "mBase");
+            LoadedApk loadedApk = (LoadedApk) XposedHelpers.getObjectField(contextImpl, "mPackageInfo");
+            String resDir = (String) XposedHelpers.getObjectField(loadedApk, "mResDir");
+            Resources res = (Resources) XposedHelpers.getObjectField(contextImpl, "mResources");
+            ResourcesImpl resImpl = (ResourcesImpl) XposedHelpers.getObjectField(res, "mResourcesImpl");
+            ClassLoader classLoader = (ClassLoader) XposedHelpers.getObjectField(contextImpl, "mClassLoader");
+            newRes = new XResources(classLoader);
+            newRes.setImpl(resImpl);
+            newRes.initObject(resDir);
+            XposedHelpers.setObjectField(contextImpl, "mResources", newRes);
+            XposedHelpers.setObjectField(loadedApk, "mResources", newRes);
+        }
 
         // Replace system resources
         XResources systemRes = new XResources(
@@ -222,15 +225,19 @@ public class XposedCompat {
         systemRes.setImpl((ResourcesImpl) XposedHelpers.getObjectField(Resources.getSystem(), "mResourcesImpl"));
         systemRes.initObject(null);
         setStaticObjectField(Resources.class, "mSystem", systemRes);
-
         XResources.init(null);
         // Return these replaced resources to further call by hookInitPackageResources
-        return new XResources[]{newRes, systemRes};
+        if (newRes != null) {
+            return new XResources[]{newRes, systemRes};
+        } else {
+            return new XResources[]{systemRes};
+        }
+
     }
 
     private static XResources cloneToXResources(XC_MethodHook.MethodHookParam param, String resDir) {
         Object result = param.getResult();
-        if (result == null || result instanceof XResources){
+        if (result == null || result instanceof XResources) {
             return null;
         }
 

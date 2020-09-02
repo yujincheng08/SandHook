@@ -6,7 +6,6 @@
 #include <jni.h>
 #include <dlfcn.h>
 #include <string_view>
-#include <android/log.h>
 
 #include "../includes/resources_type.h"
 #include "../includes/dlfcn_nougat.h"
@@ -176,8 +175,6 @@ Java_com_swift_sandhook_xposedcompat_XposedCompat_initXResourcesNative(JNIEnv *e
                                                 reinterpret_cast<void*>(rewrite_xml_native)}};
     auto reg_result = env->RegisterNatives(x_resources_class, methods,1);
     if(reg_result != JNI_OK) return JNI_FALSE;
-
-    __android_log_print(ANDROID_LOG_WARN, "SANDHOOK_NATIVE", "HERE");
 
     translate_res_id = env->GetStaticMethodID(
             x_resources_class, "translateResId",
